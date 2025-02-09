@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useCallback, CSSProperties } from "react";
+import { useEffect, useCallback, CSSProperties, useRef } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import useLocalStorageObject from "@/hooks/useLocalStorage";
 import { languages } from "@/utils/helpers";
@@ -38,6 +38,8 @@ const Home = () => {
   const totalResults = useAppSelector((state) => state.dataSlice.totalResults);
   const isLoading = useAppSelector((state) => state.dataSlice.isLoading);
 
+  const isFirstRun = useRef(true);
+
   const handleLanguageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setLocalStorageState({ selectedLanguage: e.target.value });
@@ -59,6 +61,10 @@ const Home = () => {
   );
 
   useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
     const sortQuery = sortField ? `&sort=${sortField}&order=${sortOrder}` : "";
     dispatch(
       getRepositories({

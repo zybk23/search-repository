@@ -1,9 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 
-export function useDebounce(value: string, delay: number): string {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      setDebouncedValue(value);
+      isInitialMount.current = false;
+      return;
+    }
+
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
@@ -15,3 +22,5 @@ export function useDebounce(value: string, delay: number): string {
 
   return debouncedValue;
 }
+
+export default useDebounce;

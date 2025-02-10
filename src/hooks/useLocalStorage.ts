@@ -8,7 +8,7 @@ interface IStorageState {
   selectedLanguage: string;
 }
 
-function useLocalStorageObject(key: string, initialValue: IStorageState) {
+const useLocalStorageObject = (key: string, initialValue: IStorageState) => {
   const [storedValue, setStoredValue] = useState<IStorageState>(initialValue);
 
   useEffect(() => {
@@ -37,6 +37,6 @@ function useLocalStorageObject(key: string, initialValue: IStorageState) {
   };
 
   return [storedValue, setValue] as const;
-}
+};
 
 export default useLocalStorageObject;

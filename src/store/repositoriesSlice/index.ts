@@ -17,8 +17,6 @@ interface IRepositoriesParams {
 export const getRepositories = createAsyncThunk(
   "repositoriesSlice/getRepositories",
   async (params: IRepositoriesParams, { rejectWithValue }) => {
-    console.log("getRepositories", process.env.NEXT_PUBLIC_GITHUB_TOKEN);
-
     const { searchQuery, selectedLanguage, currentPage, sortQuery } = params;
     try {
       const response = await axios.get(

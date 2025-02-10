@@ -1,5 +1,4 @@
 import { IRepositoriesType } from "@/types/repositories.types";
-import { baseApiUrl } from "@/utils/helpers";
 import {
   createSlice,
   PayloadAction,
@@ -18,10 +17,17 @@ interface IRepositoriesParams {
 export const getRepositories = createAsyncThunk(
   "repositoriesSlice/getRepositories",
   async (params: IRepositoriesParams, { rejectWithValue }) => {
+    console.log("getRepositories", process.env.NEXT_PUBLIC_GITHUB_TOKEN);
+
     const { searchQuery, selectedLanguage, currentPage, sortQuery } = params;
     try {
       const response = await axios.get(
-        `${baseApiUrl}?q=${searchQuery}+language:${selectedLanguage}${sortQuery}&page=${currentPage}&per_page=10`
+        `${process.env.NEXT_PUBLIC_API_URL}?q=${searchQuery}+language:${selectedLanguage}${sortQuery}&page=${currentPage}&per_page=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+          },
+        }
       );
 
       return response.data;

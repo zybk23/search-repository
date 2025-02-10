@@ -1,4 +1,3 @@
-export const baseApiUrl = "https://api.github.com/search/repositories";
 export const tableHeaders = [
   {
     id: 1,

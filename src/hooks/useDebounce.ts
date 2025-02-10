@@ -1,16 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  const isInitialMount = useRef(true);
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState<string>(value);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      setDebouncedValue(value);
-      isInitialMount.current = false;
-      return;
-    }
-
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);

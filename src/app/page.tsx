@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useCallback, CSSProperties, useRef } from "react";
+import { useEffect, useCallback, CSSProperties } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import useLocalStorageObject from "@/hooks/useLocalStorage";
 import { languages } from "@/utils/helpers";
@@ -26,6 +26,9 @@ const Home = () => {
       sortField: null,
       sortOrder: "asc",
       selectedLanguage: "Javascript",
+      ...(typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("repositoryState") || "{}")
+        : {}),
     }
   );
 
@@ -38,11 +41,12 @@ const Home = () => {
   const totalResults = useAppSelector((state) => state.dataSlice.totalResults);
   const isLoading = useAppSelector((state) => state.dataSlice.isLoading);
 
-  const isFirstRun = useRef(true);
-
   const handleLanguageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLocalStorageState({ selectedLanguage: e.target.value });
+      setLocalStorageState({
+        selectedLanguage: e.target.value,
+        currentPage: 1,
+      });
     },
     [setLocalStorageState]
   );
@@ -52,31 +56,24 @@ const Home = () => {
       if (sortField === field) {
         setLocalStorageState({
           sortOrder: sortOrder === "asc" ? "desc" : "asc",
+          currentPage: 1,
         });
       } else {
-        setLocalStorageState({ sortField: field, sortOrder: "asc" });
+        setLocalStorageState({
+          sortField: field,
+          sortOrder: "asc",
+          currentPage: 1,
+        });
       }
     },
     [sortField, sortOrder, setLocalStorageState]
   );
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      const sortQuery = sortField
-        ? `&sort=${sortField}&order=${sortOrder}`
-        : "";
-      dispatch(
-        getRepositories({
-          searchQuery: debouncedSearch,
-          selectedLanguage,
-          currentPage,
-          sortQuery,
-        })
-      );
-      return;
-    }
-    const sortQuery = sortField ? `&sort=${sortField}&order=${sortOrder}` : "";
+    const getSortQuery = () =>
+      sortField ? `&sort=${sortField}&order=${sortOrder}` : "";
+
+    const sortQuery = getSortQuery();
     dispatch(
       getRepositories({
         searchQuery: debouncedSearch,
@@ -92,7 +89,6 @@ const Home = () => {
     currentPage,
     sortField,
     sortOrder,
-    isFirstRun,
   ]);
 
   const renderTable = () => {
@@ -122,7 +118,10 @@ const Home = () => {
           setCurrentPage={(newPage) =>
             setLocalStorageState({ currentPage: newPage })
           }
-          totalPages={Math.ceil(Number(totalResults) / itemsPerPage)}
+          totalPages={Math.min(
+            100,
+            Math.ceil(Number(totalResults) / itemsPerPage)
+          )}
         />
       </div>
     ) : (
@@ -174,7 +173,10 @@ const Home = () => {
               className="flex-1 p-3 md:p-4 rounded-2xl border border-gray-300 text-base md:text-lg outline-none"
               value={searchQuery}
               onChange={(e) =>
-                setLocalStorageState({ searchQuery: e.target.value })
+                setLocalStorageState({
+                  searchQuery: e.target.value,
+                  currentPage: 1,
+                })
               }
             />
           </div>
